@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import React from "react";
 
 function ProductPrice({
@@ -14,7 +14,7 @@ function ProductPrice({
   return (
     <p className={cn("text-2xl", className)}>
       <span className="text-xs align-super">Rp.</span>
-      {intValue}
+      {formatCurrency(intValue)}
       <span className="text-xs align-super">. {floatValue}</span>
     </p>
   );

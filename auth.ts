@@ -7,6 +7,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { compareSync } from 'bcrypt-ts-edge';
 import type { NextAuthConfig } from 'next-auth';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export const config = {
     pages: {
@@ -58,26 +59,52 @@ export const config = {
           }
           return session
         },
-        async jwt({token, user}: any){
-            if(user){
-                token.role = user.role;
-
-                if(user.name === 'NO_NAME'){
-                    token.name = user.email!.split('@')[0]
-
-                    await prisma.user.update({
-                        where: {
-                            id: user.id,
-                        },
-                        data: {
-                            name: token.name
-                        }
-                    })
+        async jwt({ token, user, trigger, session }: any) {
+            if (user) {
+              // Assign user properties to the token
+              token.id = user.id;
+              token.role = user.role;
+          
+              if (trigger === 'signIn' || trigger === 'signUp') {
+                const cookiesObject = await cookies();
+                const sessionCartId = cookiesObject.get('sessionCartId')?.value;
+          
+                if (sessionCartId) {
+                  const sessionCart = await prisma.cart.findFirst({
+                    where: { sessionCartId },
+                  });
+          
+                  if (sessionCart) {
+                    // Overwrite any existing user cart
+                    await prisma.cart.deleteMany({
+                      where: { userId: user.id },
+                    });
+          
+                    // Assign the guest cart to the logged-in user
+                    await prisma.cart.update({
+                      where: { id: sessionCart.id },
+                      data: { userId: user.id },
+                    });
+                  }
                 }
+              }
             }
+          
             return token;
         },
         authorized({request, auth}: any){
+            const protectedPaths = [
+                /\/shipping-address/,
+                /\/payment-method/,
+                /\/place-order/,
+                /\/profile/,
+                /\/user\/(.*)/,
+                /\/order\/(.*)/,
+                /\/admin/,
+            ];
+
+            const {pathname} = request.nextUrl;
+
             if(!request.cookies.get('sessionCartId')){
                 const sessionCartId = crypto.randomUUID();
                 const newRequestHeaders = new Headers(request.headers);
