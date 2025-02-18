@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { formatNumberWithDecimal } from './utils';
+import { PAYMENT_METHODS } from './constants';
 
 const currency = z
   .string()
@@ -96,6 +97,14 @@ export const paymentResultSchema = z.object({
   status: z.string(),
   email_address: z.string(),
   pricePaid: z.string(),
+});
+
+export const paymentMethodSchema = z.object({
+  type: z.string().min(1, 'payment method is required')
+})
+.refine((data) => PAYMENT_METHODS.includes(data.type), {
+  path: ['type'],
+  message: 'Invalid payment method'
 });
 
 // Schema for updating the user profile
