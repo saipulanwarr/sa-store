@@ -14,7 +14,7 @@ function ProductPrice({
   return (
     <p className={cn("text-2xl", className)}>
       <span className="text-xs align-super">Rp.</span>
-      {formatCurrency(intValue)}
+      {formatCurrency(intValue).replace("Rp", "").trim()}
       <span className="text-xs align-super">. {floatValue}</span>
     </p>
   );

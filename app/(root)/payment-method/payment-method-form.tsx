@@ -50,7 +50,7 @@ function PaymentMethodForm({
         return;
       }
 
-      router.push("/place-oreder");
+      router.push("/place-order");
     });
   };
 
