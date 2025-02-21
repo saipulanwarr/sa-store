@@ -121,5 +121,10 @@ export function formUrlQuery({
       skipNull: true,
     }
   )
+}
 
+const NUMBER_FORMATTER = new Intl.NumberFormat('id-ID');
+
+export function formatNumber(number: number){
+  return NUMBER_FORMATTER.format(number)
 }

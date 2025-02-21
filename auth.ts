@@ -52,6 +52,7 @@ export const config = {
     callbacks: {
         async session({ session, user, trigger, token }: any) {
           session.user.id = token.sub
+          session.user.role = token.role;
           if (trigger === 'update') {
             session.user.name = user.name
             session.user.role = token.role;
